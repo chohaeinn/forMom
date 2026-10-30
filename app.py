@@ -44,23 +44,23 @@ IMP_LABEL = {1: "1 가격 봐서", 2: "2 보통", 3: "3 꼭 사기"}
 IMP_BADGE = {1: "🟢", 2: "🟡", 3: "🔴"}
 
 # ---------- 상태 ----------
-if "items" not in st.session_state:
-    st.session_state.items = []  # dict: id, cat, name, imp, limit, status, price, qty
+if "memo_items" not in st.session_state:
+    st.session_state.memo_items = []  # dict: id, cat, name, imp, limit, status, price, qty
 if "budget" not in st.session_state:
     st.session_state.budget = 0
 
 
 def todo_items():
-    items = [i for i in st.session_state.items if i["status"] == "todo"]
+    items = [i for i in st.session_state.memo_items if i["status"] == "todo"]
     return sorted(items, key=lambda x: -x["imp"])
 
 
 def cart_items():
-    return [i for i in st.session_state.items if i["status"] == "cart"]
+    return [i for i in st.session_state.memo_items if i["status"] == "cart"]
 
 
 def find(item_id):
-    for i in st.session_state.items:
+    for i in st.session_state.memo_items:
         if i["id"] == item_id:
             return i
     return None
@@ -109,8 +109,8 @@ def buy_dialog(item_id):
     if it["imp"] < 3:
         label = "🚫 패스" if too_expensive else "패스(안 사요)"
         if b2.button(label, use_container_width=True):
-            st.session_state.items = [
-                i for i in st.session_state.items if i["id"] != item_id
+            st.session_state.memo_items = [
+                i for i in st.session_state.memo_items if i["id"] != item_id
             ]
             st.rerun()
 
@@ -182,7 +182,7 @@ with st.form("add", clear_on_submit=True):
     limit = d2.number_input("기준가(선택)", min_value=0, step=100, value=0)
     if st.form_submit_button("➕ 메모 추가", use_container_width=True):
         if name.strip():
-            st.session_state.items.append(
+            st.session_state.memo_items.append(
                 {
                     "id": uuid.uuid4().hex,
                     "cat": CATEGORIES[cat_label],
@@ -213,7 +213,7 @@ with st.container(height=210, border=True):
         if b.button("🛒", key=f"buy_{it['id']}", help="카트에 담기"):
             buy_dialog(it["id"])
         if c.button("🗑", key=f"del_{it['id']}", help="메모 삭제"):
-            st.session_state.items = [
-                i for i in st.session_state.items if i["id"] != it["id"]
+            st.session_state.memo_items = [
+                i for i in st.session_state.memo_items if i["id"] != it["id"]
             ]
             st.rerun()
